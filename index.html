@@ -5,6 +5,9 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nerko+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/all.css">
   <title>翻牌小遊戲-可以色色</title>
   <style>
     * {
@@ -13,11 +16,9 @@
 
     body {
       margin: 0;
-      background-image: url(/images/背景2.jpg);
       background-repeat: no-repeat;
       background-size: cover;
-      /* background: rgb(245, 216, 119);
-       */
+      background-image: url(./images/背景2.jpg);
     }
 
     /* 卡片 */
@@ -167,15 +168,6 @@
       box-shadow: 10px 10px 15px gray;
     }
 
-    /* #scoreboard {
-      width: 140px;
-      height: 700px;
-      float: right;
-      background: #BFA380;
-      border-left: 5px solid #0D0D0D;
-    } */
-
-
     #start {
       width: 800px;
       height: 700px;
@@ -192,6 +184,20 @@
       text-align: center;
       background: rgba(255, 255, 255, 0.9);
       line-height: 700px;
+    }
+
+    #timeText {
+      font-size: 36px;
+      writing-mode: vertical-lr;
+      font-weight: 700;
+      color: #292929;
+    }
+
+    #calTime {
+      writing-mode: horizontal-tb;
+      color: red;
+      font-family: 'Nerko One', cursive;
+      font-size: 48px;
     }
   </style>
 </head>
@@ -216,14 +222,18 @@
     </div>
     <!-- <div id="scoreboard"></div> -->
     <div id="start">正式開始！</div>
+    <div id="timeText"><i class="fa-solid fa-stopwatch"> </i>&nbsp;花費時間 <sapn id="calTime">0</sapn>秒</div>
+
   </div>
+
 
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js'
     integrity='sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA=='
     crossorigin='anonymous'></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-
+    let timer = 0
+    let sec = 0;
     // 產生卡片(16張)
     for (let i = 0; i < 16; i++) {
       $('#game').append(`
@@ -249,8 +259,8 @@
       $('.card').eq(target).insertAfter($('.card').eq(i))
     }
 
-    // 1121加入
-    $('#start').hide()
+    // 預設要隱藏的項目
+    $('#start, #timeText').hide()
 
     // 按下開始遊戲按鈕發生的動作
     $('#readyToStart').click(function () {
@@ -264,21 +274,17 @@
         $('#start').show(function () {
           setTimeout(() => {
             $(this).hide()
+            $('#timeText').show()
+            // 開始計時
+            timer = setInterval(() => {
+              sec++
+              $('#calTime').text(sec)
+            }, 1000);
+
           }, 2000)
         })
       }, 5000)
     })
-
-    const timer = 0
-    function checkTime() {
-      timer++
-      const calHour = Math.floor(timer * 3600);
-      const calMinute = Math.floor(timer * 60)
-      const calSec = Math.floor(timer)
-    }
-
-
-
 
     $('#game').on('click', '.card', function () {
       // 最多一次翻兩張，且這張牌還沒被翻開
@@ -304,15 +310,17 @@
         // 不管數字有沒有一樣都將卡片翻回來
         setTimeout(() => {
           $('.card:not(.card-close').addClass('card-close')
-          if ($('.card-ok').length === $('.card').length)
+          if ($('.card-ok').length === $('.card').length) {
+            // 停止計時
+            clearInterval(timer)
             Swal.fire({
               icon: 'success',
               title: '恭喜',
-              text: '恭喜過關'
+              html: `恭喜過關！<br>你花了 ${sec}秒`
             }).then(result => {
               location.reload()
             })
-
+          }
           // 設定1秒鐘翻回來
         }, 1000)
       }
